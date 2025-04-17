@@ -1,4 +1,22 @@
-alert('Привет, рада тебя видеть!');
+const mainTitle = document.getElementsByTagName('h1')[0]; // gjпучаем заголовок 'калькулятор верстки'
+const actionButtons = document.getElementsByClassName('handler_btn'); //получение активных кнопок рассчитать и сброс
+const btnCalculate = actionButtons[0]; //рассчитать
+const btnReset = actionButtons[1]; //сброс
+const btnPlus = document.querySelector('.screen-btn'); //кнопка +
+const otherItemsPercent = document.querySelectorAll('.other-items.percent');
+const otherItemsNumber = document.querySelectorAll('.other-items.number');
+const rangeInput = document.querySelector('.rollback input[type="range"]');
+const rangeValueSpan = document.querySelector('.rollback .range-value')
+const totalInputs = document.getElementsByClassName('total-input'); //коллекция инпутов справа
+// Получаем каждый input отдельно
+const totalInput1 = totalInputs[0];
+const totalInput2 = totalInputs[1];
+const totalInput3 = totalInputs[2];
+const totalInput4 = totalInputs[3];
+const totalInput5 = totalInputs[4];
+const totalInput6 = totalInputs[5];
+
+let screenBlocks = document.querySelectorAll('.screen'); //блок с коллекцией экранов
 
 const appData = {
     title: '',
