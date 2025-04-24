@@ -1,4 +1,4 @@
-const mainTitle = document.getElementsByTagName('h1')[0]; // gjпучаем заголовок 'калькулятор верстки'
+const mainTitle = document.getElementsByTagName('h1')[0]; // получаем заголовок 'калькулятор верстки'
 const actionButtons = document.getElementsByClassName('handler_btn'); //получение активных кнопок рассчитать и сброс
 const btnCalculate = actionButtons[0]; //рассчитать
 const btnReset = actionButtons[1]; //сброс
@@ -14,7 +14,6 @@ const totalInput2 = totalInputs[1];
 const totalInput3 = totalInputs[2];
 const totalInput4 = totalInputs[3];
 const totalInput5 = totalInputs[4];
-const totalInput6 = totalInputs[5];
 
 let screenBlocks = document.querySelectorAll('.screen'); //блок с коллекцией экранов
 
@@ -24,49 +23,83 @@ const appData = {
     screenPrice: 0,
     adaptiv: true,
     rollback: 10,
-    allServicePrices: 0,
+    servicePricesPercent: 0,
+    servicePricesNumber: 0,
     fullPrice: 0,
     servicePercentPrice: 0,
-    services: [],
+    servicesPercent: [],
+    servicesNumber: [],
+    init: () => {
+        appData.addTitle();
+        btnCalculate.addEventListener('click', appData.start)
+        btnPlus.addEventListener('click', appData.addScreenBlock)
+    },
 
-    asking: () => {
-        //название проекта
-        do {
-            appData.title = prompt('Как называется ваш проект?', 'Калькулятор вёрстки').trim();
-        } while (!appData.isText(appData.title));
+    start: () => {
+        appData.addScreens();
+        appData.addServices();
 
-        //данные по экрану
-        for (let i = 0; i < 2; i++) {
-            let price, name;
+        appData.addPrices();
+        // appData.getServicePercentPrices(); // цена со скидкой
+        appData.showResult();
+        // appData.logger();
+    },
 
-            do {
-                name = prompt('Какие типы экранов нужно разработать?').trim();
-            } while (!appData.isText(name));
+    addTitle: () => {
+        document.title = title.textContent;
+    },
 
-            do {
-                price = parseFloat(prompt('Сколько будет стоить данная работа?').trim());
-            } while (!appData.isNumber(price))
+    showResult: () => {
+        totalInput1.value = appData.screenPrice;
+        totalInput3.value = appData.servicePricesPercent + appData.servicePricesNumber;
+        totalInput4.value = appData.fullPrice;
+    },
 
-            appData.screens.push({ id: i, name: name, price: price })
-        }
+    addScreens: () => {
+        let screenBlocks = document.querySelectorAll('.screen');
 
-        //дополнительные услуги
-        for (let i = 0; i < 2; i++) {
-            let name, servicePrice;
+        screenBlocks.forEach((screen, index) => {
+            const select = screen.querySelector('select');
+            const input = screen.querySelector('input');
+            const selectName = select.options[select.selectedIndex].textContent;
 
-            do {
-                name = prompt('Какой дополнительный тип услуги нужен?').trim();
-            } while (!appData.isText(name));
+            appData.screens.push({
+                id: index,
+                name: selectName,
+                price: +select.value * +input.value
+            })
+        })
 
-            do {
-                servicePrice = prompt('Сколько это будет стоить?').trim();
-            } while (!appData.isNumber(servicePrice));  // проверяем, является ли введенная стоимость числом
+        console.log(appData.screens);
+    },
 
-            appData.services.push({ id: i, name: name, servicePrice: parseFloat(servicePrice) })
-        }
+    addServices: () => {
+        otherItemsPercent.forEach((item) => {
+            const check = item.querySelector('input[type=checkbox]');
+            const label = item.querySelector('label');
+            const input = item.querySelector('input[type=text]');
 
-        //адаптив на сайте
-        appData.adaptiv = confirm('Нужен ли адаптив на сайте?');
+            if (check.checked) {
+                appData.servicesPercent[label.textContent] = +input.value;
+            }
+        })
+
+        otherItemsNumber.forEach((item) => {
+            const check = item.querySelector('input[type=checkbox]');
+            const label = item.querySelector('label');
+            const input = item.querySelector('input[type=text]');
+
+            if (check.checked) {
+                appData.servicesNumber[label.textContent] = +input.value;
+            }
+        })
+    },
+
+    addScreenBlock: () => {
+        const cloneScreen = screenBlocks[0].cloneNode(true);
+
+        screenBlocks[screenBlocks.length - 1].after(cloneScreen);
+
     },
 
     //проверка на наличие хотя бы одной буквы в строке
@@ -74,24 +107,19 @@ const appData = {
         return typeof str === 'string' && str.trim() !== '' && /[a-zA-Zа-яА-Я]/.test(str);
     },
 
-    //ф-ция проверки на число
-    isNumber: (num) => {
-        return !isNaN(parseFloat(num)) && isFinite(num) && /^[0-9]+(\.[0-9]+)?$/.test(num);;
-    },
-
     addPrices: () => {
-        appData.screenPrice = appData.screens.reduce((sum, screen) => sum + screen.price, 0);
-        appData.allServicePrices = appData.services.reduce((sum, service) => sum + service.servicePrice, 0);
-    },
+        for (let screen of appData.screens) {
+            appData.screenPrice += +screen.price;
+        }
 
-    //функция возвращает общую стоимость(работа + услуги)
-    getFullPrice: () => {
-        appData.fullPrice = appData.screenPrice + appData.allServicePrices;
-    },
+        for (let key in appData.servicesNumber) {
+            appData.servicePricesNumber += appData.servicesNumber[key];
+        }
 
-    // функция возвращает title с заглавной буквы и остальными строчными
-    getTitle: () => {
-        appData.title = appData.title.trim().charAt(0).toUpperCase() + appData.title.trim().slice(1).toLowerCase();
+        for (let key in appData.servicesPercent) {
+            appData.servicePricesPercent += appData.screenPrice * (appData.servicesPercent[key] / 100);
+        }
+        appData.fullPrice = appData.screenPrice + appData.servicePricesNumber + appData.servicePricesPercent;
     },
 
     getRollbackMessage: (price) => {
@@ -105,16 +133,6 @@ const appData = {
     // функция возвращает стоимость за вычетом отката (со скидкой)
     getServicePercentPrices: () => {
         appData.servicePercentPrice = (appData.fullPrice - (appData.fullPrice * (appData.rollback / 100)))
-    },
-
-    start: () => {
-        appData.asking();
-        appData.addPrices();
-        appData.getFullPrice(); // итоговая стоимость работы
-        appData.getServicePercentPrices(); // цена со скидкой
-        appData.getTitle();
-
-        appData.logger();
     },
 
     logger: () => {
@@ -131,4 +149,4 @@ const appData = {
     }
 }
 
-appData.start();
+appData.init();
