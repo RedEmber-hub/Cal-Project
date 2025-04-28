@@ -45,7 +45,7 @@ const appData = {
     isCalculated: false,  // флаг — был ли произведён расчет
 
     // Инициализация приложения
-    init: () => {
+    init() {
         appData.addTitle();
         appData.checkFormValidity();
 
@@ -74,7 +74,7 @@ const appData = {
     },
 
     // Запуск расчётов
-    start: () => {
+    start() {
         appData.checkFormValidity();
         appData.addScreens();
         appData.addServices();
@@ -87,7 +87,7 @@ const appData = {
     },
 
     // Проверка заполненности полей для включения кнопки "Рассчитать"
-    checkFormValidity: () => {
+    checkFormValidity() {
         let isValid = true;
 
         const screenBlocks = document.querySelectorAll('.screen');
@@ -110,12 +110,12 @@ const appData = {
     },
 
     // Установка заголовка страницы
-    addTitle: () => {
+    addTitle() {
         document.title = title.textContent;
     },
 
     // Вывод результатов в форму справа
-    showResult: () => {
+    showResult() {
         totalInput1.value = appData.screenPrice;
         totalInput2.value = appData.totalScreensCount;
         totalInput3.value = appData.servicePricesPercent + appData.servicePricesNumber;
@@ -124,7 +124,7 @@ const appData = {
     },
 
     // Добавление информации о каждом экране
-    addScreens: () => {
+    addScreens() {
         appData.screens = [];
         const screenBlocks = document.querySelectorAll('.screen');
 
@@ -146,7 +146,7 @@ const appData = {
     },
 
     // Добавление данных о доп. услугах
-    addServices: () => {
+    addServices() {
         otherItemsPercent.forEach((item) => {
             const check = item.querySelector('input[type=checkbox]');
             const label = item.querySelector('label');
@@ -169,7 +169,7 @@ const appData = {
     },
 
     // Добавление нового блока экрана
-    addScreenBlock: () => {
+    addScreenBlock() {
         const cloneScreen = screenBlocks[0].cloneNode(true);
 
         screenBlocks[screenBlocks.length - 1].after(cloneScreen);
@@ -179,12 +179,12 @@ const appData = {
     },
 
     // Проверка: строка содержит хотя бы одну букву?
-    isText: (str) => {
+    isText(str) {
         return typeof str === 'string' && str.trim() !== '' && /[a-zA-Zа-яА-Я]/.test(str);
     },
 
     // Подсчёт всех цен
-    addPrices: () => {
+    addPrices() {
         appData.screenPrice = 0;
         appData.servicePricesNumber = 0;
         appData.servicePricesPercent = 0;
@@ -214,7 +214,7 @@ const appData = {
     },
 
     // Настройка ползунка отката
-    setupRollbackInput: () => {
+    setupRollbackInput() {
         if (rangeInput && rangeValueSpan) {
             rangeInput.addEventListener('input', (event) => {
                 const value = +event.target.value;  // приводим к числу
@@ -235,7 +235,7 @@ const appData = {
         }
     },
 
-    logger: () => {
+    logger() {
         console.log('Стоимость всех дополнительных услуг:', appData.allServicePrices);
         console.log('Скидка:', appData.getRollbackMessage(appData.fullPrice));
         console.log(`Стоимость за вычетом отката посреднику ${appData.servicePercentPrice} рублей`);
