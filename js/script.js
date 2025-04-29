@@ -46,44 +46,54 @@ const appData = {
 
     // Инициализация приложения
     init() {
-        appData.addTitle();
-        appData.checkFormValidity();
+        this.addTitle();
+        this.checkFormValidity();
 
         // Клик по "Рассчитать"
-        btnCalculate.addEventListener('click', appData.start);
+        btnCalculate.addEventListener('click', appData.start.bind(appData));
 
         // Клик по "+"
-        btnPlus.addEventListener('click', appData.addScreenBlock);
+        btnPlus.addEventListener('click', appData.addScreenBlock.bind(appData));
 
         // Проверка формы при вводе данных
         document.addEventListener('input', (e) => {
             if (e.target.closest('.screen')) {
-                appData.checkFormValidity();
+                this.checkFormValidity();
             }
         });
 
         // Проверка формы при изменении select
         document.addEventListener('change', (e) => {
             if (e.target.closest('.screen')) {
-                appData.checkFormValidity();
+                this.checkFormValidity();
             }
         });
 
         // Настройка ползунка
-        appData.setupRollbackInput();
+        this.setupRollbackInput();
     },
 
     // Запуск расчётов
     start() {
-        appData.checkFormValidity();
-        appData.addScreens();
-        appData.addServices();
+        this.checkFormValidity();
+        this.addScreens();
+        this.addServices();
 
-        appData.addPrices();
+        this.addPrices();
         // appData.getServicePercentPrices(); // цена со скидкой
-        appData.showResult();
+        this.showResult();
         // appData.logger();
-        appData.isCalculated = true; // ← добавили флаг
+        this.isCalculated = true; // ← добавили флаг
+
+        // Блокируем все input и select после расчета
+        const allLeftInputs = document.querySelectorAll('.screen input[type="text"], .screen select, .other-items input[type="text"], .other-items select');
+        allLeftInputs.forEach(elem => {
+            elem.disabled = true;
+        });
+
+        // Скрываем кнопку "Рассчитать" и показываем кнопку "Сброс"
+        btnCalculate.style.display = 'none';
+        btnReset.style.display = 'block';
     },
 
     // Проверка заполненности полей для включения кнопки "Рассчитать"
@@ -116,16 +126,16 @@ const appData = {
 
     // Вывод результатов в форму справа
     showResult() {
-        totalInput1.value = appData.screenPrice;
-        totalInput2.value = appData.totalScreensCount;
-        totalInput3.value = appData.servicePricesPercent + appData.servicePricesNumber;
-        totalInput4.value = appData.fullPrice;
-        totalInput5.value = appData.servicePercentPrice;
+        totalInput1.value = this.screenPrice;
+        totalInput2.value = this.totalScreensCount;
+        totalInput3.value = this.servicePricesPercent + this.servicePricesNumber;
+        totalInput4.value = this.fullPrice;
+        totalInput5.value = this.servicePercentPrice;
     },
 
     // Добавление информации о каждом экране
     addScreens() {
-        appData.screens = [];
+        this.screens = [];
         const screenBlocks = document.querySelectorAll('.screen');
 
         screenBlocks.forEach((screen, index) => {
@@ -134,7 +144,7 @@ const appData = {
             const selectName = select.options[select.selectedIndex].textContent;
             const count = +input.value;
 
-            appData.screens.push({
+            this.screens.push({
                 id: index,
                 name: selectName,
                 price: +select.value * +input.value,
@@ -142,7 +152,7 @@ const appData = {
             })
         })
 
-        console.log(appData.screens);
+        console.log(this.screens);
     },
 
     // Добавление данных о доп. услугах
@@ -153,7 +163,7 @@ const appData = {
             const input = item.querySelector('input[type=text]');
 
             if (check.checked) {
-                appData.servicesPercent[label.textContent] = +input.value;
+                this.servicesPercent[label.textContent] = +input.value;
             }
         })
 
@@ -163,7 +173,7 @@ const appData = {
             const input = item.querySelector('input[type=text]');
 
             if (check.checked) {
-                appData.servicesNumber[label.textContent] = +input.value;
+                this.servicesNumber[label.textContent] = +input.value;
             }
         })
     },
@@ -175,7 +185,7 @@ const appData = {
         screenBlocks[screenBlocks.length - 1].after(cloneScreen);
 
         screenBlocks = document.querySelectorAll('.screen');
-        appData.checkFormValidity();
+        this.checkFormValidity();
     },
 
     // Проверка: строка содержит хотя бы одну букву?
@@ -185,32 +195,32 @@ const appData = {
 
     // Подсчёт всех цен
     addPrices() {
-        appData.screenPrice = 0;
-        appData.servicePricesNumber = 0;
-        appData.servicePricesPercent = 0;
-        appData.totalScreensCount = 0;
+        this.screenPrice = 0;
+        this.servicePricesNumber = 0;
+        this.servicePricesPercent = 0;
+        this.totalScreensCount = 0;
 
         // Складываем стоимость экранов
-        for (let screen of appData.screens) {
-            appData.screenPrice += +screen.price;
-            appData.totalScreensCount += screen.count;
+        for (let screen of this.screens) {
+            this.screenPrice += +screen.price;
+            this.totalScreensCount += screen.count;
         }
 
         // Складываем фиксированные услуги
-        for (let key in appData.servicesNumber) {
-            appData.servicePricesNumber += appData.servicesNumber[key];
+        for (let key in this.servicesNumber) {
+            this.servicePricesNumber += this.servicesNumber[key];
         }
 
         // Складываем процентные услуги
-        for (let key in appData.servicesPercent) {
-            appData.servicePricesPercent += appData.screenPrice * (appData.servicesPercent[key] / 100);
+        for (let key in this.servicesPercent) {
+            this.servicePricesPercent += this.screenPrice * (this.servicesPercent[key] / 100);
         }
 
         // Общая сумма
-        appData.fullPrice = appData.screenPrice + appData.servicePricesNumber + appData.servicePricesPercent;
+        this.fullPrice = this.screenPrice + this.servicePricesNumber + this.servicePricesPercent;
 
         // Цена с учетом отката
-        appData.servicePercentPrice = appData.fullPrice - (appData.fullPrice * (appData.rollback / 100));
+        this.servicePercentPrice = this.fullPrice - (this.fullPrice * (this.rollback / 100));
     },
 
     // Настройка ползунка отката
@@ -219,12 +229,12 @@ const appData = {
             rangeInput.addEventListener('input', (event) => {
                 const value = +event.target.value;  // приводим к числу
                 rangeValueSpan.textContent = value; // показываем значение
-                appData.rollback = +value; // сохраняем откат
+                this.rollback = +value; // сохраняем откат
 
                 // Если расчёт уже был, пересчитываем цену
-                if (appData.isCalculated) {
-                    appData.addPrices();
-                    totalInput5.value = appData.servicePercentPrice;
+                if (this.isCalculated) {
+                    this.addPrices();
+                    totalInput5.value = this.servicePercentPrice;
                 }
             });
 
@@ -236,11 +246,11 @@ const appData = {
     },
 
     logger() {
-        console.log('Стоимость всех дополнительных услуг:', appData.allServicePrices);
-        console.log('Скидка:', appData.getRollbackMessage(appData.fullPrice));
-        console.log(`Стоимость за вычетом отката посреднику ${appData.servicePercentPrice} рублей`);
-        console.log(appData.screens);
-        console.log(appData.services);
+        console.log('Стоимость всех дополнительных услуг:', this.allServicePrices);
+        console.log('Скидка:', this.getRollbackMessage(this.fullPrice));
+        console.log(`Стоимость за вычетом отката посреднику ${this.servicePercentPrice} рублей`);
+        console.log(this.screens);
+        console.log(this.services);
     }
 }
 
