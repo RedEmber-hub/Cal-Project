@@ -26,7 +26,11 @@ const totalInput4 = totalInputs[3];
 const totalInput5 = totalInputs[4];
 
 // Коллекция блоков с экранами
-let screenBlocks = document.querySelectorAll('.screen'); //блок с коллекцией экранов
+let screenBlocks = document.querySelectorAll('.screen');
+
+// Элементы CMS
+const cmsOpenCheckbox = document.getElementById('cms-open'); // Получение элемента чекбокса "CMS"
+const hiddenCmsVariantsBlock = document.querySelector('.hidden-cms-variants'); // Блок с доп вариантами CMS 
 
 // Главный объект с данными и методами
 const appData = {
@@ -40,8 +44,8 @@ const appData = {
     servicePricesNumber: 0,
     fullPrice: 0,
     servicePercentPrice: 0,
-    servicesPercent: [],
-    servicesNumber: [],
+    servicesPercent: {},
+    servicesNumber: {},
     isCalculated: false,  // флаг — был ли произведён расчет
 
     // Инициализация приложения
@@ -74,6 +78,9 @@ const appData = {
 
         // Настройка ползунка
         this.setupRollbackInput();
+
+        // Проверка формы на изменение чекбокса CMS
+        cmsOpenCheckbox.addEventListener('change', this.toggleCmsVariants);
     },
 
     // Запуск расчётов
@@ -107,9 +114,12 @@ const appData = {
 
         // Удаляем все экраны кроме первого
         const screenBlocks = document.querySelectorAll('.screen');
+
         screenBlocks.forEach((block, index) => {
             if (index !== 0) block.remove();
         });
+
+        this.screenBlocks = document.querySelectorAll('.screen');
 
         // Сбрасываем все input и select
         document.querySelectorAll('input, select').forEach(el => {
@@ -125,9 +135,9 @@ const appData = {
         });
 
         // Сброс значений слайдера и отката
-        rangeInput.value = 10;
-        rangeValueSpan.textContent = 10;
-        this.rollback = 10;
+        rangeInput.value = 0;
+        rangeValueSpan.textContent = 0;
+        this.rollback = 0;
 
         // Сброс значений в блоке результата
         totalInput1.value = '';
@@ -145,12 +155,12 @@ const appData = {
         this.servicePricesNumber = 0;
         this.fullPrice = 0;
         this.servicePercentPrice = 0;
-        this.servicesPercent = [];
-        this.servicesNumber = [];
+        this.servicesPercent = {};
+        this.servicesNumber = {};
         this.isCalculated = false;
 
-        // Обновляем коллекцию экранов
-        screenBlocks = document.querySelectorAll('.screen');
+        // Скрываем блок с доп вариантами CMS
+        hiddenCmsVariantsBlock.style.display = 'none';
 
         // Проверка формы после сброса
         this.checkFormValidity();
@@ -181,7 +191,7 @@ const appData = {
 
     // Установка заголовка страницы
     addTitle() {
-        document.title = title.textContent;
+        document.title = mainTitle.textContent;
     },
 
     // Вывод результатов в форму справа
@@ -305,12 +315,20 @@ const appData = {
         }
     },
 
+    // 
+    toggleCmsVariants() {
+        // Проверяем состояние чекбокса
+        if (cmsOpenCheckbox.checked) {
+            hiddenCmsVariantsBlock.style.display = 'flex';
+        } else {
+            hiddenCmsVariantsBlock.style.display = 'none';
+        }
+    },
+
     logger() {
-        console.log('Стоимость всех дополнительных услуг:', this.allServicePrices);
         console.log('Скидка:', this.getRollbackMessage(this.fullPrice));
         console.log(`Стоимость за вычетом отката посреднику ${this.servicePercentPrice} рублей`);
         console.log(this.screens);
-        console.log(this.services);
     }
 }
 
