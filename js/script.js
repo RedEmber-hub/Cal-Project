@@ -52,6 +52,9 @@ const appData = {
         // Клик по "Рассчитать"
         btnCalculate.addEventListener('click', appData.start.bind(appData));
 
+        // Клик по "Сброс"
+        btnReset.addEventListener('click', appData.reset.bind(appData));
+
         // Клик по "+"
         btnPlus.addEventListener('click', appData.addScreenBlock.bind(appData));
 
@@ -94,6 +97,63 @@ const appData = {
         // Скрываем кнопку "Рассчитать" и показываем кнопку "Сброс"
         btnCalculate.style.display = 'none';
         btnReset.style.display = 'block';
+    },
+
+    // Сброс формы
+    reset() {
+        // Скрываем кнопку "Сброс" и показываем кнопку "Рассчитать"
+        btnReset.style.display = 'none';
+        btnCalculate.style.display = 'block';
+
+        // Удаляем все экраны кроме первого
+        const screenBlocks = document.querySelectorAll('.screen');
+        screenBlocks.forEach((block, index) => {
+            if (index !== 0) block.remove();
+        });
+
+        // Сбрасываем все input и select
+        document.querySelectorAll('input, select').forEach(el => {
+            if (el.type === 'checkbox' || el.type === 'radio') {
+                el.checked = false;
+            } else if (el.tagName.toLowerCase() === 'select') {
+                el.selectedIndex = 0;
+            } else {
+                el.value = '';
+            }
+
+            el.disabled = false;
+        });
+
+        // Сброс значений слайдера и отката
+        rangeInput.value = 10;
+        rangeValueSpan.textContent = 10;
+        this.rollback = 10;
+
+        // Сброс значений в блоке результата
+        totalInput1.value = '';
+        totalInput2.value = '';
+        totalInput3.value = '';
+        totalInput4.value = '';
+        totalInput5.value = '';
+
+        // Сброс внутренних данных
+        this.title = '';
+        this.screens = [];
+        this.screenPrice = 0;
+        this.adaptiv = true;
+        this.servicePricesPercent = 0;
+        this.servicePricesNumber = 0;
+        this.fullPrice = 0;
+        this.servicePercentPrice = 0;
+        this.servicesPercent = [];
+        this.servicesNumber = [];
+        this.isCalculated = false;
+
+        // Обновляем коллекцию экранов
+        screenBlocks = document.querySelectorAll('.screen');
+
+        // Проверка формы после сброса
+        this.checkFormValidity();
     },
 
     // Проверка заполненности полей для включения кнопки "Рассчитать"
